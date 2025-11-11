@@ -12,8 +12,47 @@
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+        <q-item-label header> Navegación </q-item-label>
+        <q-item to="/" exact clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="home" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Inicio</q-item-label>
+          </q-item-section>
+        </q-item>
 
+        <q-item to="/colaboradores" exact clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="group" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Colaboradores</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <!-- Futuras secciones
+        <q-item to="/competencias" exact clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="psychology" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Competencias</q-item-label>
+          </q-item-section>
+        </q-item>
+
+        <q-item to="/vacantes" exact clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="work" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Vacantes</q-item-label>
+          </q-item-section>
+        </q-item>
+        -->
+
+        <q-separator spaced />
+        <q-item-label header> Recursos </q-item-label>
         <EssentialLink v-for="link in linksList" :key="link.title" v-bind="link" />
       </q-list>
     </q-drawer>

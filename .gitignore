@@ -7,6 +7,15 @@ node_modules
 /dist
 /quasar.config.*.temporary.compiled*
 
+# Build artifacts (future backend / monorepo)
+/backend/node_modules
+/backend/dist
+/backend/.tmp
+
+# Env files (frontend + backend)
+.env*
+!.env.example
+
 # Cordova related directories and files
 /src-cordova/node_modules
 /src-cordova/platforms
@@ -31,3 +40,18 @@ yarn-error.log*
 
 # local .env files
 .env.local*
+
+# Logs generales
+*.log
+
+# Coverage (si añadimos tests)
+coverage
+
+# Docker artefacts temporales
+*.pid
+*.seed
+
+# VSCode settings locales (opcional)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
