@@ -1,10 +1,22 @@
 const routes = [
+  // Rutas públicas (auth)
+  {
+    path: '/',
+    component: () => import('layouts/AuthLayout.vue'),
+    children: [{ path: '', name: 'login', component: () => import('pages/LoginPage.vue') }],
+  },
+
+  // Rutas protegidas (app)
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
+    meta: { requiresAuth: true },
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') },
-      { path: 'colaboradores', component: () => import('pages/CollaboratorsPage.vue') },
+      {
+        path: 'colaboradores',
+        name: 'colaboradores',
+        component: () => import('pages/CollaboratorsPage.vue'),
+      },
       // { path: 'competencias', component: () => import('pages/SkillsPage.vue') },
       // { path: 'vacantes', component: () => import('pages/VacanciesPage.vue') },
     ],

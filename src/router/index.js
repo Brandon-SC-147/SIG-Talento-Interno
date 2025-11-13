@@ -33,5 +33,17 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   })
 
+  // Guard simple de autenticación
+  Router.beforeEach((to) => {
+    const requiresAuth = to.matched.some((r) => r.meta?.requiresAuth)
+    if (!requiresAuth) return true
+
+    const token = localStorage.getItem('auth_token')
+    if (!token) {
+      return { name: 'login', query: { redirect: to.fullPath } }
+    }
+    return true
+  })
+
   return Router
 })

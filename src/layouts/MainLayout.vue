@@ -13,12 +13,12 @@
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
         <q-item-label header> Navegación </q-item-label>
-        <q-item to="/" exact clickable v-ripple>
+        <q-item to="/" exact clickable v-ripple class="disabled" @click.prevent>
           <q-item-section avatar>
             <q-icon name="home" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Inicio</q-item-label>
+            <q-item-label>Inicio de Sesión</q-item-label>
           </q-item-section>
         </q-item>
 
