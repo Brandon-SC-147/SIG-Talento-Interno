@@ -57,11 +57,14 @@ VITE_DEMO_EMAIL=admin@demo.com
 VITE_DEMO_PASSWORD=Admin123!
 # o permitir cualquier combinación (solo dev)
 VITE_DEMO_ALLOW_ANY=false
+
+# CRUD de colaboradores en localStorage (lista, buscar, ordenar, paginar)
+VITE_USE_FAKE_API=true
 ```
 
 Cómo quitarlo cuando exista backend:
 
-- Deja `VITE_USE_FAKE_AUTH=false` (o elimina la variable) y reinicia el dev server/build.
+- Deja `VITE_USE_FAKE_AUTH=false` y `VITE_USE_FAKE_API=false` (o elimina las variables) y reinicia el dev server/build.
 - El código del store ignora el modo demo en producción (`import.meta.env.PROD`).
 
 ## Módulos implementados

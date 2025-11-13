@@ -2,6 +2,41 @@ import { defineStore } from 'pinia'
 import { api } from 'boot/axios'
 import { useAuthStore } from './auth'
 
+const DEMO_API = import.meta?.env?.VITE_USE_FAKE_API === 'true' && !import.meta.env.PROD
+const STORAGE_KEY = 'demo_collaborators'
+
+function demoSeed() {
+  const existing = localStorage.getItem(STORAGE_KEY)
+  if (existing) return JSON.parse(existing)
+  const roles = ['Desarrollador', 'Analista', 'Líder Técnico', 'RRHH']
+  const skills = [
+    { id: 'leadership', name: 'Liderazgo' },
+    { id: 'communication', name: 'Comunicación' },
+    { id: 'javascript', name: 'JavaScript' },
+    { id: 'sql', name: 'SQL' },
+  ]
+  const items = Array.from({ length: 24 }).map((_, i) => {
+    const id = i + 1
+    return {
+      id,
+      name: `Colaborador ${id}`,
+      email: `col${id}@demo.com`,
+      role: roles[id % roles.length],
+      skills: [skills[id % skills.length]],
+    }
+  })
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  return items
+}
+
+function demoSave(items) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+}
+
+function sleep(ms = 250) {
+  return new Promise((r) => setTimeout(r, ms))
+}
+
 export const useCollaboratorsStore = defineStore('collaborators', {
   state: () => ({
     items: [],
@@ -36,6 +71,37 @@ export const useCollaboratorsStore = defineStore('collaborators', {
       this.error = null
       this._ensureAuthHeader()
       try {
+        if (DEMO_API) {
+          await sleep()
+          const all = demoSeed()
+          const q = (search ?? this.filters.search ?? '').toString().toLowerCase().trim()
+          let filtered = !q
+            ? all
+            : all.filter((it) =>
+                [it.name, it.email, it.role].some((v) => v?.toLowerCase().includes(q)),
+              )
+          const sBy = sortBy ?? this.pagination.sortBy
+          const desc = (descending ?? this.pagination.descending) ? -1 : 1
+          filtered = filtered.sort((a, b) => (a[sBy] > b[sBy] ? 1 : -1) * desc)
+
+          const p = page ?? this.pagination.page
+          const limit = rowsPerPage ?? this.pagination.rowsPerPage
+          const start = (p - 1) * limit
+          const end = start + limit
+          const pageItems = filtered.slice(start, end)
+
+          this.items = pageItems
+          this.pagination = {
+            ...this.pagination,
+            page: p,
+            rowsPerPage: limit,
+            sortBy: sBy,
+            descending: desc === -1,
+            rowsNumber: filtered.length,
+          }
+          this.filters.search = q
+          return
+        }
         const params = {
           page: page ?? this.pagination.page,
           limit: rowsPerPage ?? this.pagination.rowsPerPage,
@@ -67,6 +133,18 @@ export const useCollaboratorsStore = defineStore('collaborators', {
       this.error = null
       this._ensureAuthHeader()
       try {
+        if (DEMO_API) {
+          await sleep()
+          const all = demoSeed()
+          const id = Math.max(0, ...all.map((i) => Number(i.id) || 0)) + 1
+          const item = { id, ...payload }
+          const updated = [item, ...all]
+          demoSave(updated)
+          // actualizar lista visible
+          this.items.unshift(item)
+          this.pagination.rowsNumber += 1
+          return item
+        }
         const { data } = await api.post('/collaborators', payload)
         // Optimista: insertar al inicio
         this.items.unshift(data)
@@ -85,6 +163,18 @@ export const useCollaboratorsStore = defineStore('collaborators', {
       this.error = null
       this._ensureAuthHeader()
       try {
+        if (DEMO_API) {
+          await sleep()
+          const all = demoSeed()
+          const idx = all.findIndex((it) => it.id === id)
+          if (idx !== -1) {
+            all[idx] = { ...all[idx], ...payload, id }
+            demoSave(all)
+          }
+          const localIdx = this.items.findIndex((it) => it.id === id)
+          if (localIdx !== -1) this.items[localIdx] = all[idx]
+          return all[idx]
+        }
         const { data } = await api.put(`/collaborators/${id}`, payload)
         const idx = this.items.findIndex((it) => it.id === id)
         if (idx !== -1) this.items[idx] = data
@@ -102,6 +192,15 @@ export const useCollaboratorsStore = defineStore('collaborators', {
       this.error = null
       this._ensureAuthHeader()
       try {
+        if (DEMO_API) {
+          await sleep()
+          const all = demoSeed()
+          const updated = all.filter((it) => it.id !== id)
+          demoSave(updated)
+          this.items = this.items.filter((it) => it.id !== id)
+          this.pagination.rowsNumber = Math.max(0, this.pagination.rowsNumber - 1)
+          return
+        }
         await api.delete(`/collaborators/${id}`)
         this.items = this.items.filter((it) => it.id !== id)
         this.pagination.rowsNumber = Math.max(0, this.pagination.rowsNumber - 1)
