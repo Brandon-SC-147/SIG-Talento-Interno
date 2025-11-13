@@ -84,7 +84,8 @@ async function onSubmit() {
   try {
     await auth.login({ email: email.value, password: password.value })
     notifySuccess('Bienvenido')
-    router.push('/colaboradores')
+    const redirect = router.currentRoute.value.query?.redirect || '/colaboradores'
+    router.push(redirect)
   } catch (err) {
     notifyError(err, 'No se pudo iniciar sesión')
   } finally {

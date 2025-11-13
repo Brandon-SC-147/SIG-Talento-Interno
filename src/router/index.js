@@ -38,6 +38,11 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     const requiresAuth = to.matched.some((r) => r.meta?.requiresAuth)
     if (!requiresAuth) return true
 
+    // Permitir paso automático en modo demo de autenticación (solo dev)
+    if (import.meta?.env?.VITE_USE_FAKE_AUTH === 'true' && !import.meta.env.PROD) {
+      return true
+    }
+
     const token = localStorage.getItem('auth_token')
     if (!token) {
       return { name: 'login', query: { redirect: to.fullPath } }
