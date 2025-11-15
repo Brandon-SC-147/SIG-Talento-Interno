@@ -8,6 +8,9 @@
     <q-separator />
 
     <q-card-section>
+      <q-banner v-if="errorMessage" class="q-mb-md" dense rounded inline-actions type="warning">
+        {{ errorMessage }}
+      </q-banner>
       <q-form ref="formRef" @submit.prevent="onSubmit" class="q-gutter-md">
         <q-input
           v-model="email"
@@ -15,6 +18,7 @@
           type="email"
           autocomplete="username"
           dense
+          :disable="loading"
           :rules="[rules.required, rules.email]"
         />
         <q-input
@@ -23,6 +27,7 @@
           label="Contraseña"
           autocomplete="current-password"
           dense
+          :disable="loading"
           :rules="[rules.required, rules.min6]"
         >
           <template #append>
@@ -35,9 +40,19 @@
         </q-input>
 
         <div class="row items-center q-gutter-sm">
-          <q-checkbox v-model="remember" label="Recordarme" />
+          <q-checkbox v-model="remember" label="Recordarme" :disable="loading" />
           <q-space />
           <q-btn color="primary" label="Ingresar" type="submit" :loading="loading" />
+        </div>
+        <div class="q-mt-md text-center">
+          <q-btn
+            flat
+            color="secondary"
+            label="Iniciar Sesión Demo"
+            :loading="loading"
+            @click="onDemoLogin"
+            no-caps
+          />
         </div>
       </q-form>
     </q-card-section>
@@ -45,7 +60,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 import { useApiError } from 'src/composables/useApiError'
@@ -61,6 +76,15 @@ const remember = ref(true)
 const isPwd = ref(true)
 
 const loading = ref(false)
+const errorMessage = computed(() => {
+  const err = auth.error
+  if (!err) return ''
+  return (
+    err?.response?.data?.message ||
+    err?.message ||
+    'Credenciales inválidas. Verifica tu correo y contraseña.'
+  )
+})
 
 //
 
@@ -78,10 +102,24 @@ async function onSubmit() {
   try {
     await auth.login({ email: email.value, password: password.value })
     notifySuccess('Bienvenido')
-    const redirect = router.currentRoute.value.query?.redirect || '/colaboradores'
+    const redirect = router.currentRoute.value.query?.redirect || auth.homeByRole(auth.user?.role)
     router.push(redirect)
   } catch (err) {
     notifyError(err, 'No se pudo iniciar sesión')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function onDemoLogin() {
+  loading.value = true
+  try {
+    await auth.demoLogin()
+    notifySuccess('Bienvenido (modo demo)')
+    const redirect = router.currentRoute.value.query?.redirect || auth.homeByRole(auth.user?.role)
+    router.push(redirect)
+  } catch (err) {
+    notifyError(err, 'Error en demo login')
   } finally {
     loading.value = false
   }

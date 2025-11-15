@@ -6,6 +6,7 @@ const TOKEN_KEY = 'auth_token'
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: localStorage.getItem(TOKEN_KEY) || '',
+    // user: { id, name, email, role }
     user: null,
     loading: false,
     error: null,
@@ -14,6 +15,15 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => Boolean(state.token),
   },
   actions: {
+    // Redirección por rol: admin | leader | collaborator
+    homeByRole(role) {
+      const r = (role || this.user?.role || '').toString().toLowerCase()
+      if (r === 'admin' || r === 'rrhh' || r === 'hr' || r === 'administrator')
+        return '/dashboard/rrhh'
+      if (r === 'leader' || r === 'líder' || r === 'lider') return '/dashboard/lider'
+      return '/colaboradores'
+    },
+
     setToken(token) {
       this.token = token || ''
       if (this.token) {
@@ -36,6 +46,26 @@ export const useAuthStore = defineStore('auth', {
         // Opcional: cargar datos del usuario actual
         this.user = data?.user || null
         return data
+      } catch (err) {
+        this.error = err
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // Login demo sin API (temporal)
+    async demoLogin() {
+      this.loading = true
+      this.error = null
+      try {
+        // Simular delay
+        await new Promise((resolve) => setTimeout(resolve, 500))
+        const fakeToken = 'demo-token-' + Date.now()
+        const fakeUser = { id: 1, name: 'Usuario Demo', email: 'demo@example.com', role: 'admin' }
+        this.setToken(fakeToken)
+        this.user = fakeUser
+        return { token: fakeToken, user: fakeUser }
       } catch (err) {
         this.error = err
         throw err
