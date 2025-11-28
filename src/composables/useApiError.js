@@ -1,12 +1,8 @@
-import { useQuasar } from 'quasar'
-
 /**
  * Manejo estandarizado de errores de API.
  * Devuelve un parser y una función para notificar.
  */
 export function useApiError() {
-  const $q = useQuasar()
-
   function parseError(err, fallback = 'Ocurrió un error') {
     // Axios error shape: err.response?.data?.message || err.message
     const msg =
@@ -16,12 +12,14 @@ export function useApiError() {
 
   function notifyError(err, fallback) {
     const message = parseError(err, fallback)
-    $q.notify({ type: 'negative', message })
+    // Notificaciones deshabilitadas temporalmente
+    console.error('[API Error]', message)
     return message
   }
 
   function notifySuccess(message) {
-    $q.notify({ type: 'positive', message })
+    // Notificaciones deshabilitadas temporalmente
+    console.log('[Success]', message)
   }
 
   return { parseError, notifyError, notifySuccess }

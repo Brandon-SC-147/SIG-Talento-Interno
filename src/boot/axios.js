@@ -12,9 +12,10 @@ import axios from 'axios'
 //   VITE_USE_PROXY=true
 //   VITE_PROXY_TARGET=https://localhost:5001
 const USE_PROXY = import.meta?.env?.VITE_USE_PROXY === 'true'
+// URL del backend - hardcoded temporalmente porque .env no se lee correctamente
 const baseURL = USE_PROXY
   ? '/api'
-  : import.meta?.env?.VITE_API_BASE_URL || 'https://api.example.com'
+  : import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:5186/api'
 const AUTH_REQUIRED = import.meta?.env?.VITE_REQUIRE_AUTH !== 'false'
 const api = axios.create({ baseURL })
 
