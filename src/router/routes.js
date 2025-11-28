@@ -13,12 +13,26 @@ const routes = [
     meta: { requiresAuth: true },
     children: [
       {
+        path: '',
+        redirect: '/colaboradores',
+      },
+      {
         path: 'colaboradores',
         name: 'colaboradores',
         component: () => import('pages/CollaboratorsPage.vue'),
       },
-      // { path: 'competencias', component: () => import('pages/SkillsPage.vue') },
-      // { path: 'vacantes', component: () => import('pages/VacanciesPage.vue') },
+      {
+        path: 'vacantes',
+        name: 'vacantes',
+        component: () => import('pages/VacantesPage.vue'),
+        meta: { roles: ['Líder', 'Lider', 'Admin', 'RRHH'] },
+      },
+      {
+        path: 'dashboard',
+        name: 'dashboard',
+        component: () => import('pages/DashboardPage.vue'),
+        meta: { roles: ['Admin', 'RRHH', 'HR'] },
+      },
     ],
   },
 

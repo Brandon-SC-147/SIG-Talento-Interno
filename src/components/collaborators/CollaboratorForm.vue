@@ -110,41 +110,163 @@
       </div>
     </div>
 
-    <!-- Competencias -->
+    <!-- Skills Técnicos -->
     <q-separator class="q-my-md" />
-    <div class="text-subtitle2 text-grey-7 q-mb-sm text-center">Competencias y habilidades</div>
+    <div class="text-subtitle2 text-grey-7 q-mb-sm text-center">Skills Técnicos</div>
     <div class="row q-col-gutter-md">
       <div class="col-12">
         <q-select
-          v-model="localModel.skills"
-          :options="skillOptions"
-          label="Competencias"
-          use-chips
-          multiple
-          emit-value
-          map-options
+          v-model="selectedTechnicalSkill"
+          :options="technicalSkillOptions"
+          label="Agregar skill técnico"
           dense
           outlined
           option-value="value"
           option-label="label"
+          @update:model-value="addSkill('tecnico')"
+          clearable
         >
-          <template #option="{ itemProps, opt, selected, toggleOption }">
-            <q-item v-bind="itemProps">
-              <q-item-section side>
-                <q-checkbox :model-value="selected" @update:model-value="toggleOption(opt)" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ opt.label }}</q-item-label>
-                <q-item-label caption>{{ opt.category || 'General' }}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
           <template #no-option>
             <q-item>
-              <q-item-section class="text-grey">No hay competencias disponibles</q-item-section>
+              <q-item-section class="text-grey">No hay skills técnicos disponibles</q-item-section>
             </q-item>
           </template>
         </q-select>
+      </div>
+      <div class="col-12" v-if="localModel.skillsTecnicos?.length">
+        <q-list bordered separator class="rounded-borders">
+          <q-item v-for="(skill, idx) in localModel.skillsTecnicos" :key="skill.skillId">
+            <q-item-section>
+              <q-item-label>{{ getSkillLabel(skill.skillId) }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-select
+                v-model="skill.nivelId"
+                :options="nivelOptions"
+                label="Nivel"
+                dense
+                outlined
+                emit-value
+                map-options
+                style="min-width: 140px"
+              />
+            </q-item-section>
+            <q-item-section side>
+              <q-btn
+                flat
+                round
+                dense
+                icon="delete"
+                color="negative"
+                @click="removeSkill('tecnico', idx)"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+    </div>
+
+    <!-- Skills Blandos -->
+    <q-separator class="q-my-md" />
+    <div class="text-subtitle2 text-grey-7 q-mb-sm text-center">Skills Blandos</div>
+    <div class="row q-col-gutter-md">
+      <div class="col-12">
+        <q-select
+          v-model="selectedSoftSkill"
+          :options="softSkillOptions"
+          label="Agregar skill blando"
+          dense
+          outlined
+          option-value="value"
+          option-label="label"
+          @update:model-value="addSkill('blando')"
+          clearable
+        >
+          <template #no-option>
+            <q-item>
+              <q-item-section class="text-grey">No hay skills blandos disponibles</q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+      </div>
+      <div class="col-12" v-if="localModel.skillsBlandos?.length">
+        <q-list bordered separator class="rounded-borders">
+          <q-item v-for="(skill, idx) in localModel.skillsBlandos" :key="skill.skillId">
+            <q-item-section>
+              <q-item-label>{{ getSkillLabel(skill.skillId) }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-select
+                v-model="skill.nivelId"
+                :options="nivelOptions"
+                label="Nivel"
+                dense
+                outlined
+                emit-value
+                map-options
+                style="min-width: 140px"
+              />
+            </q-item-section>
+            <q-item-section side>
+              <q-btn
+                flat
+                round
+                dense
+                icon="delete"
+                color="negative"
+                @click="removeSkill('blando', idx)"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+    </div>
+
+    <!-- Certificaciones -->
+    <q-separator class="q-my-md" />
+    <div class="text-subtitle2 text-grey-7 q-mb-sm text-center">Certificaciones y Cursos</div>
+    <div class="row q-col-gutter-md">
+      <div class="col-12 col-md-10">
+        <q-input
+          v-model="newCertificacion"
+          label="Nueva certificación o curso"
+          dense
+          outlined
+          placeholder="Ej: AWS Certified Solutions Architect"
+          @keyup.enter="addCertificacion"
+        />
+      </div>
+      <div class="col-12 col-md-2">
+        <q-btn
+          color="primary"
+          icon="add"
+          label="Agregar"
+          @click="addCertificacion"
+          dense
+          class="full-width"
+        />
+      </div>
+      <div class="col-12" v-if="localModel.certificaciones?.length">
+        <q-list bordered separator class="rounded-borders">
+          <q-item v-for="(cert, idx) in localModel.certificaciones" :key="idx">
+            <q-item-section avatar>
+              <q-icon name="verified" color="primary" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ cert }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-btn
+                flat
+                round
+                dense
+                icon="delete"
+                color="negative"
+                @click="removeCertificacion(idx)"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
       </div>
     </div>
 
@@ -180,7 +302,7 @@
           rows="2"
           dense
           outlined
-          placeholder="Certificaciones, cursos completados, notas adicionales..."
+          placeholder="Notas adicionales..."
         />
       </div>
     </div>
@@ -207,7 +329,9 @@ const props = defineProps({
       rolId: null,
       cuenta: '',
       estado: 'Activo',
-      skills: [],
+      skillsTecnicos: [],
+      skillsBlandos: [],
+      certificaciones: [],
       disponibilidad: true,
       fechaDisponibilidad: '',
       observaciones: '',
@@ -229,11 +353,89 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
 const formRef = ref(null)
 const showPassword = ref(false)
+const selectedTechnicalSkill = ref(null)
+const selectedSoftSkill = ref(null)
+const newCertificacion = ref('')
 
 const statusOptions = [
   { label: 'Activo', value: 'Activo' },
   { label: 'Inactivo', value: 'Inactivo' },
 ]
+
+// Niveles de dominio para skills
+const nivelOptions = [
+  { label: 'Básico', value: 1 },
+  { label: 'Intermedio', value: 2 },
+  { label: 'Avanzado', value: 3 },
+  { label: 'Experto', value: 4 },
+]
+
+// Filtrar skills técnicos (categoría "Técnico" o similar)
+const technicalSkillOptions = computed(() => {
+  const selectedIds = (localModel.value.skillsTecnicos || []).map((s) => s.skillId)
+  return props.skillOptions.filter(
+    (s) =>
+      (s.category?.toLowerCase() === 'técnico' ||
+        s.category?.toLowerCase() === 'tecnico' ||
+        s.tipo === 'tecnico') &&
+      !selectedIds.includes(s.value),
+  )
+})
+
+// Filtrar skills blandos (categoría "Blando" o similar)
+const softSkillOptions = computed(() => {
+  const selectedIds = (localModel.value.skillsBlandos || []).map((s) => s.skillId)
+  return props.skillOptions.filter(
+    (s) =>
+      (s.category?.toLowerCase() === 'blando' ||
+        s.category?.toLowerCase() === 'soft' ||
+        s.tipo === 'blando') &&
+      !selectedIds.includes(s.value),
+  )
+})
+
+function getSkillLabel(skillId) {
+  const skill = props.skillOptions.find((s) => s.value === skillId)
+  return skill?.label || `Skill ${skillId}`
+}
+
+function addSkill(tipo) {
+  if (tipo === 'tecnico' && selectedTechnicalSkill.value) {
+    if (!localModel.value.skillsTecnicos) localModel.value.skillsTecnicos = []
+    localModel.value.skillsTecnicos.push({
+      skillId: selectedTechnicalSkill.value.value,
+      nivelId: 2, // Intermedio por defecto
+    })
+    selectedTechnicalSkill.value = null
+  } else if (tipo === 'blando' && selectedSoftSkill.value) {
+    if (!localModel.value.skillsBlandos) localModel.value.skillsBlandos = []
+    localModel.value.skillsBlandos.push({
+      skillId: selectedSoftSkill.value.value,
+      nivelId: 2, // Intermedio por defecto
+    })
+    selectedSoftSkill.value = null
+  }
+}
+
+function removeSkill(tipo, idx) {
+  if (tipo === 'tecnico') {
+    localModel.value.skillsTecnicos.splice(idx, 1)
+  } else {
+    localModel.value.skillsBlandos.splice(idx, 1)
+  }
+}
+
+function addCertificacion() {
+  if (newCertificacion.value?.trim()) {
+    if (!localModel.value.certificaciones) localModel.value.certificaciones = []
+    localModel.value.certificaciones.push(newCertificacion.value.trim())
+    newCertificacion.value = ''
+  }
+}
+
+function removeCertificacion(idx) {
+  localModel.value.certificaciones.splice(idx, 1)
+}
 
 function getDefaultModel() {
   return {
@@ -245,7 +447,9 @@ function getDefaultModel() {
     rolId: 3,
     cuenta: '',
     estado: 'Activo',
-    skills: [],
+    skillsTecnicos: [],
+    skillsBlandos: [],
+    certificaciones: [],
     disponibilidad: true,
     fechaDisponibilidad: '',
     observaciones: '',
@@ -266,6 +470,11 @@ watch(
     delete newModel.contraseñaHash
     delete newModel.contraseña_hash
     delete newModel.passwordHash
+
+    // Asegurar arrays
+    if (!newModel.skillsTecnicos) newModel.skillsTecnicos = []
+    if (!newModel.skillsBlandos) newModel.skillsBlandos = []
+    if (!newModel.certificaciones) newModel.certificaciones = []
 
     localModel.value = newModel
     // Resetear validación cuando cambia el modelo
