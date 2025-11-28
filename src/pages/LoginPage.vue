@@ -44,6 +44,12 @@
           <q-space />
           <q-btn color="primary" label="Ingresar" type="submit" :loading="loading" />
         </div>
+
+        <div class="text-center q-mt-md">
+          <router-link to="/register" class="text-primary">
+            ¿No tienes cuenta? Regístrate aquí
+          </router-link>
+        </div>
       </q-form>
     </q-card-section>
   </q-card>
