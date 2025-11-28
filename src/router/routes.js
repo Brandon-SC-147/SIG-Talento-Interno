@@ -14,24 +14,40 @@ const routes = [
     children: [
       {
         path: '',
-        redirect: '/colaboradores',
+        redirect: '/mi-perfil',
       },
+      // === COLABORADOR ===
       {
-        path: 'colaboradores',
-        name: 'colaboradores',
-        component: () => import('pages/CollaboratorsPage.vue'),
+        path: 'mi-perfil',
+        name: 'mi-perfil',
+        component: () => import('pages/MiPerfilPage.vue'),
+        meta: { title: 'Mi Perfil' },
+      },
+      // === LÍDER ===
+      {
+        path: 'lider',
+        name: 'lider-dashboard',
+        component: () => import('pages/LiderDashboardPage.vue'),
+        meta: { title: 'Panel del Líder', roles: ['Líder', 'Lider', 'Admin', 'RRHH'] },
       },
       {
         path: 'vacantes',
         name: 'vacantes',
         component: () => import('pages/VacantesPage.vue'),
-        meta: { roles: ['Líder', 'Lider', 'Admin', 'RRHH'] },
+        meta: { title: 'Vacantes', roles: ['Líder', 'Lider', 'Admin', 'RRHH'] },
+      },
+      // === ADMIN / RRHH ===
+      {
+        path: 'colaboradores',
+        name: 'colaboradores',
+        component: () => import('pages/CollaboratorsPage.vue'),
+        meta: { title: 'Colaboradores', roles: ['Admin', 'RRHH'] },
       },
       {
         path: 'dashboard',
         name: 'dashboard',
         component: () => import('pages/DashboardPage.vue'),
-        meta: { roles: ['Admin', 'RRHH', 'HR'] },
+        meta: { title: 'Dashboard RRHH', roles: ['Admin', 'RRHH', 'HR'] },
       },
     ],
   },

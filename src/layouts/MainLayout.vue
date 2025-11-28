@@ -17,18 +17,40 @@
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Navegación </q-item-label>
+        <!-- ========== COLABORADOR ========== -->
+        <q-item-label header>
+          <q-icon name="person" class="q-mr-xs" />
+          Colaborador
+        </q-item-label>
 
-        <q-item to="/colaboradores" exact clickable v-ripple>
+        <q-item to="/mi-perfil" exact clickable v-ripple>
           <q-item-section avatar>
-            <q-icon name="group" />
+            <q-icon name="account_circle" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Colaboradores</q-item-label>
+            <q-item-label>Mi Perfil</q-item-label>
+            <q-item-label caption>Skills y disponibilidad</q-item-label>
           </q-item-section>
         </q-item>
 
-        <!-- Vacantes - Para Líderes y Admin -->
+        <q-separator class="q-my-sm" />
+
+        <!-- ========== LÍDER ========== -->
+        <q-item-label header>
+          <q-icon name="supervisor_account" class="q-mr-xs" />
+          Líder
+        </q-item-label>
+
+        <q-item to="/lider" exact clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="space_dashboard" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Panel del Líder</q-item-label>
+            <q-item-label caption>Mi equipo y búsqueda</q-item-label>
+          </q-item-section>
+        </q-item>
+
         <q-item to="/vacantes" exact clickable v-ripple>
           <q-item-section avatar>
             <q-icon name="work" />
@@ -39,10 +61,27 @@
           </q-item-section>
         </q-item>
 
-        <!-- Dashboard - Para Admin/RRHH -->
+        <q-separator class="q-my-sm" />
+
+        <!-- ========== ADMIN / RRHH ========== -->
+        <q-item-label header>
+          <q-icon name="admin_panel_settings" class="q-mr-xs" />
+          Admin / RRHH
+        </q-item-label>
+
+        <q-item to="/colaboradores" exact clickable v-ripple>
+          <q-item-section avatar>
+            <q-icon name="groups" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Gestión Colaboradores</q-item-label>
+            <q-item-label caption>Crear, editar, eliminar</q-item-label>
+          </q-item-section>
+        </q-item>
+
         <q-item to="/dashboard" exact clickable v-ripple>
           <q-item-section avatar>
-            <q-icon name="dashboard" />
+            <q-icon name="analytics" />
           </q-item-section>
           <q-item-section>
             <q-item-label>Dashboard RRHH</q-item-label>
@@ -52,10 +91,13 @@
 
         <q-separator class="q-my-md" />
 
-        <q-item-label header> Información </q-item-label>
+        <!-- Info usuario -->
+        <q-item-label header> Sesión Actual </q-item-label>
         <q-item>
           <q-item-section avatar>
-            <q-icon name="person" />
+            <q-avatar color="primary" text-color="white" size="sm">
+              {{ authStore.user?.email?.charAt(0)?.toUpperCase() || 'U' }}
+            </q-avatar>
           </q-item-section>
           <q-item-section>
             <q-item-label>{{ authStore.user?.email || 'Usuario' }}</q-item-label>
@@ -97,17 +139,6 @@ const userRoleLabel = computed(() => {
   if (r.includes('lider') || r.includes('líder') || r.includes('leader')) return 'Líder'
   return 'Colaborador'
 })
-
-// Permisos de navegación (para uso futuro con control de acceso por rol)
-// const canAccessVacantes = computed(() => {
-//   const r = userRole.value
-//   return r.includes('admin') || r.includes('rrhh') || r.includes('hr') ||
-//          r.includes('lider') || r.includes('líder') || r.includes('leader')
-// })
-// const canAccessDashboard = computed(() => {
-//   const r = userRole.value
-//   return r.includes('admin') || r.includes('rrhh') || r.includes('hr')
-// })
 
 function logout() {
   authStore.logout()
