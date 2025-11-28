@@ -35,10 +35,24 @@ export default defineRouter(function (/* { store, ssrContext } */) {
 
   // Guard simple de autenticación
   Router.beforeEach((to) => {
+    const AUTH_REQUIRED = import.meta?.env?.VITE_REQUIRE_AUTH !== 'false'
+
+    // Si no se requiere auth (modo invitado), permitir todo y evitar mostrar /login
+    if (!AUTH_REQUIRED) {
+      if (to.name === 'login') return { path: '/colaboradores' }
+      return true
+    }
+
+    const token = localStorage.getItem('auth_token')
+
+    // Si ya está autenticado y va a /login, redirigir al inicio de la app
+    if (to.name === 'login' && token) {
+      return { path: '/colaboradores' }
+    }
+
     const requiresAuth = to.matched.some((r) => r.meta?.requiresAuth)
     if (!requiresAuth) return true
 
-    const token = localStorage.getItem('auth_token')
     if (!token) {
       return { name: 'login', query: { redirect: to.fullPath } }
     }

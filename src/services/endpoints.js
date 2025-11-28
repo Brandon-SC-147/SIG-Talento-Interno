@@ -1,17 +1,24 @@
-// Centraliza rutas (ajústalas a tu API real)
+// Endpoints del backend .NET: https://github.com/AldoRJ24/SistemaDeGestionTalento
 export const Endpoints = {
   auth: {
-    login: '/auth/login',
-    me: '/auth/me',
+    login: '/Auth/login',
+    register: '/Auth/register',
   },
-  collaborators: {
-    base: '/collaborators',
-    byId: (id) => `/collaborators/${id}`,
+  usuarios: {
+    base: '/Usuarios',
+    byId: (id) => `/Usuarios/${id}`,
+    assignSkill: (id) => `/Usuarios/${id}/skills`,
   },
   skills: {
-    base: '/skills',
+    base: '/Skills',
+    byId: (id) => `/Skills/${id}`,
   },
-  vacancies: {
-    base: '/vacancies',
+  vacantes: {
+    base: '/Vacantes',
+    byId: (id) => `/Vacantes/${id}`,
+    assignSkill: (id) => `/Vacantes/${id}/skills`,
+  },
+  matches: {
+    byVacante: (vacanteId) => `/Matches/vacante/${vacanteId}`,
   },
 }

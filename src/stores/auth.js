@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { api } from 'boot/axios'
+import { Endpoints } from 'src/services/endpoints'
 
 const TOKEN_KEY = 'auth_token'
 
@@ -39,18 +40,58 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        // Ajusta el endpoint de login según tu API
-        const { data } = await api.post('/auth/login', { email, password })
-        const token = data?.token
+        // Backend .NET devuelve el token directamente como string
+        const { data: token } = await api.post(Endpoints.auth.login, {
+          email,
+          password,
+        })
         this.setToken(token)
-        // Opcional: cargar datos del usuario actual
-        this.user = data?.user || null
-        return data
+        // El backend no devuelve datos del usuario en login, podrías decodificar el JWT
+        // o hacer otra llamada para obtener info del usuario
+        this.user = this.decodeToken(token)
+        return { token, user: this.user }
       } catch (err) {
-        this.error = err
+        this.error = err?.response?.data || err.message
         throw err
       } finally {
         this.loading = false
+      }
+    },
+
+    async register({ nombre, apellido, email, password, puesto, rolId }) {
+      this.loading = true
+      this.error = null
+      try {
+        const { data } = await api.post(Endpoints.auth.register, {
+          nombre,
+          apellido,
+          email,
+          password,
+          puesto,
+          rolId: rolId || 1,
+        })
+        return data
+      } catch (err) {
+        this.error = err?.response?.data || err.message
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // Decodificar JWT para obtener info del usuario
+    decodeToken(token) {
+      try {
+        const base64Url = token.split('.')[1]
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+        const payload = JSON.parse(window.atob(base64))
+        return {
+          id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
+          email: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
+          role: payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+        }
+      } catch {
+        return null
       }
     },
 
@@ -84,6 +125,7 @@ export const useAuthStore = defineStore('auth', {
       const token = localStorage.getItem(TOKEN_KEY)
       if (token) {
         this.setToken(token)
+        this.user = this.decodeToken(token)
       }
     },
   },

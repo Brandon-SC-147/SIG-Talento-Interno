@@ -44,16 +44,6 @@
           <q-space />
           <q-btn color="primary" label="Ingresar" type="submit" :loading="loading" />
         </div>
-        <div class="q-mt-md text-center">
-          <q-btn
-            flat
-            color="secondary"
-            label="Iniciar Sesión Demo"
-            :loading="loading"
-            @click="onDemoLogin"
-            no-caps
-          />
-        </div>
       </q-form>
     </q-card-section>
   </q-card>
@@ -106,20 +96,6 @@ async function onSubmit() {
     router.push(redirect)
   } catch (err) {
     notifyError(err, 'No se pudo iniciar sesión')
-  } finally {
-    loading.value = false
-  }
-}
-
-async function onDemoLogin() {
-  loading.value = true
-  try {
-    await auth.demoLogin()
-    notifySuccess('Bienvenido (modo demo)')
-    const redirect = router.currentRoute.value.query?.redirect || auth.homeByRole(auth.user?.role)
-    router.push(redirect)
-  } catch (err) {
-    notifyError(err, 'Error en demo login')
   } finally {
     loading.value = false
   }

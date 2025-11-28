@@ -7,7 +7,15 @@ import axios from 'axios'
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const baseURL = import.meta?.env?.VITE_API_BASE_URL || 'https://api.example.com'
+// Permite usar un proxy local en dev para evitar CORS (ver quasar.config.js)
+// .env.local:
+//   VITE_USE_PROXY=true
+//   VITE_PROXY_TARGET=https://localhost:5001
+const USE_PROXY = import.meta?.env?.VITE_USE_PROXY === 'true'
+const baseURL = USE_PROXY
+  ? '/api'
+  : import.meta?.env?.VITE_API_BASE_URL || 'https://api.example.com'
+const AUTH_REQUIRED = import.meta?.env?.VITE_REQUIRE_AUTH !== 'false'
 const api = axios.create({ baseURL })
 
 export default defineBoot(({ app, router }) => {
@@ -36,7 +44,7 @@ export default defineBoot(({ app, router }) => {
     (resp) => resp,
     (error) => {
       const status = error?.response?.status
-      if (status === 401) {
+      if (status === 401 && AUTH_REQUIRED) {
         // Borrar token y redirigir a login
         localStorage.removeItem('auth_token')
         if (router) {

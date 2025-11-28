@@ -1,7 +1,7 @@
 const routes = [
   // Rutas públicas (auth)
   {
-    path: '/',
+    path: '/login',
     component: () => import('layouts/AuthLayout.vue'),
     children: [{ path: '', name: 'login', component: () => import('pages/LoginPage.vue') }],
   },
