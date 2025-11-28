@@ -40,15 +40,25 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        // Backend .NET devuelve el token directamente como string
-        const { data: token } = await api.post(Endpoints.auth.login, {
+        // Backend .NET devuelve { token, userId, nombre, email, rolId }
+        const { data } = await api.post(Endpoints.auth.login, {
           email,
           password,
         })
+        // Soportar ambos formatos: objeto con token o token directo (string)
+        const token = typeof data === 'string' ? data : data.token
         this.setToken(token)
-        // El backend no devuelve datos del usuario en login, podrías decodificar el JWT
-        // o hacer otra llamada para obtener info del usuario
-        this.user = this.decodeToken(token)
+        // Si el backend devuelve datos del usuario, usarlos; sino decodificar JWT
+        if (typeof data === 'object' && data.userId) {
+          this.user = {
+            id: data.userId,
+            name: data.nombre,
+            email: data.email,
+            role: data.rolId,
+          }
+        } else {
+          this.user = this.decodeToken(token)
+        }
         return { token, user: this.user }
       } catch (err) {
         this.error = err?.response?.data || err.message

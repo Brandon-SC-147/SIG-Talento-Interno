@@ -44,7 +44,8 @@
           dense
           outlined
           :disable="loading"
-          :rules="[rules.required, rules.email]"
+          :rules="[rules.required, rules.email, rules.empresaEmail]"
+          hint="Usa tu correo corporativo @empresa.com"
         />
 
         <q-input
@@ -150,6 +151,7 @@ const rules = {
   min2: (v) => (v?.length ?? 0) >= 2 || 'Mínimo 2 caracteres',
   min6: (v) => (v?.length ?? 0) >= 6 || 'Mínimo 6 caracteres',
   email: (v) => /\S+@\S+\.\S+/.test(v) || 'Email inválido',
+  empresaEmail: (v) => v?.endsWith('@empresa.com') || 'El correo debe ser @empresa.com',
   matchPassword: (v) => v === form.value.password || 'Las contraseñas no coinciden',
 }
 
