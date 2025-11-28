@@ -15,6 +15,18 @@
           </template>
         </q-input>
       </div>
+      <div class="col-12 col-md-3">
+        <q-select
+          v-model="statusFilter"
+          :options="statusOptions"
+          dense
+          outlined
+          emit-value
+          map-options
+          label="Estado"
+          @update:model-value="onRefresh"
+        />
+      </div>
       <div class="col-grow"></div>
       <div class="col-auto">
         <q-btn color="primary" icon="add" label="Nuevo" @click="openCreate" />
@@ -32,10 +44,35 @@
       binary-state-sort
       @request="onRequest"
     >
+      <template #body-cell-name="{ row }">
+        <q-td>
+          <div class="row items-center q-gutter-xs no-wrap">
+            <span :class="rowIsInactive(row) ? 'text-grey-6' : ''">{{ row.name }}</span>
+            <q-chip v-if="rowIsInactive(row)" dense color="grey-7" text-color="white" size="sm"
+              >Inactivo</q-chip
+            >
+          </div>
+        </q-td>
+      </template>
       <template #body-cell-actions="{ row }">
         <q-td align="right">
-          <q-btn size="sm" flat round icon="edit" @click="openEdit(row)" />
-          <q-btn size="sm" flat round color="negative" icon="delete" @click="confirmDelete(row)" />
+          <q-btn
+            size="sm"
+            flat
+            round
+            icon="edit"
+            @click="openEdit(row)"
+            :disable="rowIsInactive(row)"
+          />
+          <q-btn
+            size="sm"
+            flat
+            round
+            color="negative"
+            icon="delete"
+            @click="confirmDelete(row)"
+            :disable="rowIsInactive(row)"
+          />
         </q-td>
       </template>
 
@@ -99,11 +136,24 @@ const columns = [
 ]
 
 const search = ref('')
+const statusOptions = [
+  { label: 'Activo', value: 'active' },
+  { label: 'Inactivo', value: 'inactive' },
+  { label: 'Todos', value: null },
+]
+const statusFilter = ref('active')
 
 async function onRequest(props) {
   const { page, rowsPerPage, sortBy, descending } = props.pagination
   try {
-    await store.fetchList({ page, rowsPerPage, sortBy, descending, search: search.value })
+    await store.fetchList({
+      page,
+      rowsPerPage,
+      sortBy,
+      descending,
+      search: search.value,
+      status: statusFilter.value,
+    })
   } catch (err) {
     notifyError(err, 'No se pudo cargar la lista de colaboradores')
   }
@@ -174,7 +224,9 @@ async function handleSubmit(payload) {
 function confirmDelete(row) {
   $q.dialog({
     title: 'Eliminar',
-    message: `¿Eliminar a ${row.name}?`,
+    message: rowIsInactive(row)
+      ? `Este colaborador está inactivo. ¿Eliminar a ${row.name}?`
+      : `¿Eliminar a ${row.name}?`,
     cancel: true,
     persistent: true,
     ok: { color: 'negative', label: 'Eliminar' },
@@ -187,5 +239,9 @@ function confirmDelete(row) {
       notifyError(err, 'No se pudo eliminar')
     }
   })
+}
+
+function rowIsInactive(row) {
+  return row?.status === 'inactive' || row?.active === false || row?.isActive === false
 }
 </script>

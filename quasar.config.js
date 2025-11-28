@@ -53,7 +53,23 @@ export default defineConfig((/* ctx */) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      // Configurar proxy de Vite para desarrollo (evita CORS)
+      extendViteConf(viteConf) {
+        // Solo aplica en dev server
+        viteConf.server = viteConf.server || {}
+        const target = process.env.VITE_PROXY_TARGET || 'https://localhost:5001'
+        // Si el usuario activa VITE_USE_PROXY=true en .env.local,
+        // axios usará baseURL='/api' y aquí se redirige al backend
+        viteConf.server.proxy = Object.assign({}, viteConf.server.proxy, {
+          '/api': {
+            target,
+            changeOrigin: true,
+            secure: false,
+            // Opcional: reescribir si el backend no espera el prefijo /api
+            // rewrite: (path) => path.replace(/^\/api/, ''),
+          },
+        })
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
