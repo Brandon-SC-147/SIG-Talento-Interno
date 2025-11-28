@@ -1,7 +1,12 @@
 <template>
-  <q-form @submit.prevent="onSubmit" @reset.prevent="onCancel" ref="formRef" class="q-gutter-md">
+  <q-form
+    @submit.prevent="onSubmit"
+    @reset.prevent="onCancel"
+    ref="formRef"
+    class="q-gutter-md q-px-md"
+  >
     <!-- Datos personales -->
-    <div class="text-subtitle2 text-grey-7 q-mb-sm">Datos personales</div>
+    <div class="text-subtitle2 text-grey-7 q-mb-sm text-center">Datos personales</div>
     <div class="row q-col-gutter-md">
       <div class="col-12 col-md-6">
         <q-input
@@ -57,7 +62,7 @@
 
     <!-- Información laboral -->
     <q-separator class="q-my-md" />
-    <div class="text-subtitle2 text-grey-7 q-mb-sm">Información laboral</div>
+    <div class="text-subtitle2 text-grey-7 q-mb-sm text-center">Información laboral</div>
     <div class="row q-col-gutter-md">
       <div class="col-12 col-md-6">
         <q-input
@@ -107,7 +112,7 @@
 
     <!-- Competencias -->
     <q-separator class="q-my-md" />
-    <div class="text-subtitle2 text-grey-7 q-mb-sm">Competencias y habilidades</div>
+    <div class="text-subtitle2 text-grey-7 q-mb-sm text-center">Competencias y habilidades</div>
     <div class="row q-col-gutter-md">
       <div class="col-12">
         <q-select
@@ -145,8 +150,8 @@
 
     <!-- Disponibilidad -->
     <q-separator class="q-my-md" />
-    <div class="text-subtitle2 text-grey-7 q-mb-sm">Disponibilidad</div>
-    <div class="row q-col-gutter-md">
+    <div class="text-subtitle2 text-grey-7 q-mb-sm text-center">Disponibilidad</div>
+    <div class="row q-col-gutter-md items-center">
       <div class="col-12 col-md-6">
         <q-toggle
           v-model="localModel.disponibilidad"
@@ -225,8 +230,6 @@ const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
 const formRef = ref(null)
 const showPassword = ref(false)
 
-const localModel = ref({ ...getDefaultModel(), ...props.modelValue })
-
 const statusOptions = [
   { label: 'Activo', value: 'Activo' },
   { label: 'Inactivo', value: 'Inactivo' },
@@ -249,11 +252,26 @@ function getDefaultModel() {
   }
 }
 
+const localModel = ref(getDefaultModel())
+
+// Sincronizar cuando cambia el modelValue (inmediatamente)
 watch(
   () => props.modelValue,
   (val) => {
-    localModel.value = { ...getDefaultModel(), ...val }
+    const newModel = { ...getDefaultModel(), ...val }
+    // NUNCA mostrar contraseñas hasheadas del backend
+    // El password solo se usa para crear usuarios nuevos
+    newModel.password = ''
+    // Eliminar campos de hash que puedan venir del backend
+    delete newModel.contraseñaHash
+    delete newModel.contraseña_hash
+    delete newModel.passwordHash
+
+    localModel.value = newModel
+    // Resetear validación cuando cambia el modelo
+    formRef.value?.resetValidation()
   },
+  { immediate: true, deep: true },
 )
 
 watch(

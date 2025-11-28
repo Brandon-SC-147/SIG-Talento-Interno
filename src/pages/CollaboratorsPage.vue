@@ -140,7 +140,7 @@
 
     <!-- Dialog Crear/Editar -->
     <q-dialog v-model="dialog" persistent>
-      <q-card style="min-width: 650px; max-width: 90vw">
+      <q-card style="width: 700px; max-width: 90vw">
         <q-card-section class="row items-center q-pb-none bg-primary text-white">
           <q-icon :name="dialogMode === 'edit' ? 'edit' : 'person_add'" size="sm" class="q-mr-sm" />
           <div class="text-h6">{{ dialogMode === 'edit' ? 'Editar' : 'Nuevo' }} colaborador</div>
@@ -148,8 +148,9 @@
           <q-btn icon="close" flat round dense v-close-popup color="white" />
         </q-card-section>
         <q-separator />
-        <q-card-section class="q-pt-md" style="max-height: 70vh; overflow-y: auto">
+        <q-card-section class="q-pa-lg" style="max-height: 70vh; overflow-y: auto">
           <CollaboratorForm
+            :key="formKey"
             v-model="form"
             :mode="dialogMode"
             :loading="saving"
@@ -418,6 +419,7 @@ const dialog = ref(false)
 const dialogMode = ref('create')
 const form = ref(getDefaultForm())
 const saving = ref(false)
+const formKey = ref(0) // Clave para forzar recreación del formulario
 
 // Dialog ver detalles
 const viewDialog = ref(false)
@@ -443,11 +445,13 @@ function getDefaultForm() {
 function openCreate() {
   dialogMode.value = 'create'
   form.value = getDefaultForm()
+  formKey.value++ // Forzar recreación del componente
   dialog.value = true
 }
 
 function openEdit(row) {
   dialogMode.value = 'edit'
+  formKey.value++ // Forzar recreación del componente
   form.value = {
     id: row.id,
     nombre: row.nombre || '',
