@@ -16,13 +16,13 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: (state) => Boolean(state.token),
   },
   actions: {
-    // Redirección por rol: admin | leader | collaborator
+    // Redirección por rol: devuelve objeto de ruta (router.push acepta obj o string)
     homeByRole(role) {
       const r = (role || this.user?.role || '').toString().toLowerCase()
       if (r === 'admin' || r === 'rrhh' || r === 'hr' || r === 'administrator')
-        return '/dashboard/rrhh'
-      if (r === 'leader' || r === 'líder' || r === 'lider') return '/dashboard/lider'
-      return '/colaboradores'
+        return { name: 'dashboard' }
+      if (r === 'leader' || r === 'líder' || r === 'lider') return { name: 'lider-dashboard' }
+      return { name: 'colaboradores' }
     },
 
     setToken(token) {
@@ -41,10 +41,12 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
       try {
         // Backend .NET devuelve { token, userId, nombre, email, rolId }
+        console.debug('[Auth] POST', Endpoints.auth.login, { email })
         const { data } = await api.post(Endpoints.auth.login, {
           email,
           password,
         })
+        console.debug('[Auth] response data:', data)
         // Soportar ambos formatos: objeto con token o token directo (string)
         const token = typeof data === 'string' ? data : data.token
         this.setToken(token)
@@ -61,6 +63,8 @@ export const useAuthStore = defineStore('auth', {
         }
         return { token, user: this.user }
       } catch (err) {
+        // Guardar info de error para mostrar en UI y para debugging
+        console.error('[Auth] login error:', err?.response || err)
         this.error = err?.response?.data || err.message
         throw err
       } finally {

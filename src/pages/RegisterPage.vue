@@ -96,6 +96,7 @@
           emit-value
           map-options
           :disable="loading"
+          :rules="[rules.required]"
         />
 
         <div class="row items-center justify-between q-mt-md">
@@ -137,13 +138,14 @@ const form = ref({
   password: '',
   confirmPassword: '',
   puesto: '',
-  rolId: 3, // Colaborador por defecto
+  // Colaborador por defecto (ajusta IDs según tu seeder/backend)
+  rolId: 3,
 })
 
 const roleOptions = [
-  { label: 'Colaborador', value: 3 },
-  { label: 'Líder', value: 2 },
   { label: 'RRHH / Admin', value: 1 },
+  { label: 'Líder', value: 2 },
+  { label: 'Colaborador', value: 3 },
 ]
 
 const rules = {
@@ -163,30 +165,40 @@ async function onSubmit() {
   errorMessage.value = ''
 
   try {
-    await auth.register({
+    const payload = {
       nombre: form.value.nombre,
       apellido: form.value.apellido,
       email: form.value.email,
       password: form.value.password,
-      puesto: form.value.puesto,
+      // Si no escribe puesto, va "Nuevo Ingreso" (como en el código de tu amigo)
+      puesto: form.value.puesto || 'Nuevo Ingreso',
       rolId: form.value.rolId,
-    })
+    }
 
-    notifySuccess('Cuenta creada exitosamente')
+    console.log('Enviando registro:', payload)
 
-    // Auto-login después de registrar
+    await auth.register(payload)
+
+    notifySuccess('Cuenta creada exitosamente. Iniciando sesión...')
+
+    // Auto-login después del registro
     try {
       await auth.login({
         email: form.value.email,
         password: form.value.password,
       })
       router.push(auth.homeByRole(auth.user?.role))
-    } catch {
-      // Si falla el auto-login, redirigir al login
+    } catch (loginErr) {
+      console.error('Error en auto-login:', loginErr)
       router.push('/login')
     }
   } catch (err) {
-    errorMessage.value = err?.response?.data?.message || err?.message || 'Error al crear la cuenta'
+    console.error('Error en registro:', err)
+    errorMessage.value =
+      err?.response?.data?.message ||
+      err?.response?.data ||
+      err?.message ||
+      'Error al crear la cuenta'
     notifyError(err, 'No se pudo crear la cuenta')
   } finally {
     loading.value = false

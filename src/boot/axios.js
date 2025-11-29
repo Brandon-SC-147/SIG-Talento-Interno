@@ -12,12 +12,31 @@ import axios from 'axios'
 //   VITE_USE_PROXY=true
 //   VITE_PROXY_TARGET=https://localhost:5001
 const USE_PROXY = import.meta?.env?.VITE_USE_PROXY === 'true'
-// URL del backend - hardcoded temporalmente porque .env no se lee correctamente
-const baseURL = USE_PROXY
-  ? '/api'
-  : import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:5186/api'
+// En modo desarrollo preferimos usar el proxy Vite ('/api') para evitar CORS
+// aunque VITE_USE_PROXY no esté presente o esté mal configurado.
+const baseURL =
+  import.meta?.env?.DEV || USE_PROXY
+    ? '/api'
+    : import.meta?.env?.VITE_API_BASE_URL || 'http://localhost:5242/api'
+// Mostrar en consola qué URL se está usando (útil en desarrollo)
+console.debug('[API] baseURL =', baseURL)
 const AUTH_REQUIRED = import.meta?.env?.VITE_REQUIRE_AUTH !== 'false'
 const api = axios.create({ baseURL })
+
+// Interceptor global para detectar errores de red y normalizar mensajes
+api.interceptors.response.use(
+  (resp) => resp,
+  (error) => {
+    // Si no hay respuesta es un error de red (server off, CORS no resuelto, etc.)
+    if (!error.response) {
+      error.message = 'Network Error: no response from server'
+      console.error('[API] Network error or server unreachable', error)
+      return Promise.reject(error)
+    }
+    // Dejar que los handlers locales procesen códigos HTTP
+    return Promise.reject(error)
+  },
+)
 
 export default defineBoot(({ app, router }) => {
   // for use inside Vue files (Options API) through this.$axios and this.$api
