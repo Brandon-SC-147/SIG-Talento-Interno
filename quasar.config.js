@@ -57,7 +57,7 @@ export default defineConfig((/* ctx */) => {
       extendViteConf(viteConf) {
         // Solo aplica en dev server
         viteConf.server = viteConf.server || {}
-        const target = process.env.VITE_PROXY_TARGET || 'https://localhost:5001'
+        const target = process.env.VITE_PROXY_TARGET || 'http://localhost:5242'
         // Si el usuario activa VITE_USE_PROXY=true en .env.local,
         // axios usará baseURL='/api' y aquí se redirige al backend
         viteConf.server.proxy = Object.assign({}, viteConf.server.proxy, {
@@ -107,7 +107,7 @@ export default defineConfig((/* ctx */) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: [],
+      plugins: ['Notify', 'Dialog'],
     },
 
     // animations: 'all', // --- includes all animations

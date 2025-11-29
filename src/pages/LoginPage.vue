@@ -8,10 +8,13 @@
     <q-separator />
 
     <q-card-section>
+      <!-- Banner de error -->
       <q-banner v-if="errorMessage" class="q-mb-md" dense rounded inline-actions type="warning">
         {{ errorMessage }}
       </q-banner>
+
       <q-form ref="formRef" @submit.prevent="onSubmit" class="q-gutter-md">
+        <!-- Correo -->
         <q-input
           v-model="email"
           label="Correo"
@@ -21,6 +24,8 @@
           :disable="loading"
           :rules="[rules.required, rules.email]"
         />
+
+        <!-- Contraseña -->
         <q-input
           v-model="password"
           :type="isPwd ? 'password' : 'text'"
@@ -39,16 +44,17 @@
           </template>
         </q-input>
 
+        <!-- Recordarme + botón Ingresar -->
         <div class="row items-center q-gutter-sm">
           <q-checkbox v-model="remember" label="Recordarme" :disable="loading" />
           <q-space />
           <q-btn color="primary" label="Ingresar" type="submit" :loading="loading" />
         </div>
 
-        <div class="text-center q-mt-md">
-          <router-link to="/register" class="text-primary">
-            ¿No tienes cuenta? Regístrate aquí
-          </router-link>
+        <!-- Registro -->
+        <div class="q-mt-sm text-center">
+          <span class="text-grey-7">¿No tienes cuenta?</span>
+          <q-btn flat color="primary" label="Regístrate aquí" to="/register" no-caps />
         </div>
       </q-form>
     </q-card-section>
@@ -72,6 +78,7 @@ const remember = ref(true)
 const isPwd = ref(true)
 
 const loading = ref(false)
+
 const errorMessage = computed(() => {
   const err = auth.error
   if (!err) return ''
@@ -82,8 +89,7 @@ const errorMessage = computed(() => {
   )
 })
 
-//
-
+// Reglas de validación
 const rules = {
   required: (v) => !!v || 'Requerido',
   email: (v) => /\S+@\S+\.\S+/.test(v) || 'Email inválido',
@@ -98,8 +104,12 @@ async function onSubmit() {
   try {
     await auth.login({ email: email.value, password: password.value })
     notifySuccess('Bienvenido')
+
+    // 🔹 MISMA LÓGICA QUE EL LOGIN DE TU AMIGO
     const redirect = router.currentRoute.value.query?.redirect || auth.homeByRole(auth.user?.role)
-    router.push(redirect)
+
+    console.debug('[Login] redirect -> ', redirect)
+    await router.push(redirect)
   } catch (err) {
     notifyError(err, 'No se pudo iniciar sesión')
   } finally {
