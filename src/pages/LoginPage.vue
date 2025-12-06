@@ -97,6 +97,9 @@ const rules = {
 }
 
 async function onSubmit() {
+  // 👇 si ya está en medio de un login, no hagas nada
+  if (loading.value) return
+
   const ok = await formRef.value.validate()
   if (!ok) return
 
@@ -105,11 +108,8 @@ async function onSubmit() {
     await auth.login({ email: email.value, password: password.value })
     notifySuccess('Bienvenido')
 
-    // 🔹 MISMA LÓGICA QUE EL LOGIN DE TU AMIGO
-    const redirect = router.currentRoute.value.query?.redirect || auth.homeByRole(auth.user?.role)
-
-    console.debug('[Login] redirect -> ', redirect)
-    await router.push(redirect)
+    // / 🔹 Solo redirigir a mi-perfil
+    await router.push('/mi-perfil')
   } catch (err) {
     notifyError(err, 'No se pudo iniciar sesión')
   } finally {
